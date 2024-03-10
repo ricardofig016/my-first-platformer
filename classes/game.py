@@ -1,6 +1,8 @@
 import sys
 import pygame
 
+from icecream import ic
+
 from scripts.utils import load_image, load_images
 from classes.entities import PhysicsEntity
 from classes.tilemap import Tilemap
@@ -36,7 +38,7 @@ class Game:
 
             self.tilemap.render(self.display)
 
-            self.player.update((self.movement[1] - self.movement[0], 0))
+            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display)
 
             for event in pygame.event.get():
@@ -51,6 +53,10 @@ class Game:
                         self.movement[0] = True
                     elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         self.movement[1] = True
+                    elif event.key == pygame.K_UP or event.key == pygame.K_w:
+                        self.player.velocity[1] = -3
+                    elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                        pass
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         self.movement[0] = False
