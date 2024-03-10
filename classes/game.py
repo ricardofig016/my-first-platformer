@@ -5,9 +5,10 @@ import time
 from icecream import ic
 
 from scripts.utils import load_image, load_images
-from classes.entities import PhysicsEntity
+from classes.entities import PhysicsEntity, Player
 from classes.tilemap import Tilemap
 from classes.clouds import Clouds
+from classes.animations import Animation
 
 
 class Game:
@@ -30,11 +31,16 @@ class Game:
             "player": load_image("entities/player.png"),
             "background": load_image("background.png"),
             "clouds": load_images("clouds"),
+            "player/idle": Animation(load_images("entities/player/idle"), 6),
+            "player/jump": Animation(load_images("entities/player/jump")),
+            "player/run": Animation(load_images("entities/player/run"), 4),
+            "player/slide": Animation(load_images("entities/player/slide")),
+            "player/wall_slide": Animation(load_images("entities/player/wall_slide")),
         }
 
         self.clouds = Clouds(self.assets["clouds"], 16)
 
-        self.player = PhysicsEntity(self, "player", (50, 50), (8, 15))
+        self.player = Player(self, (50, 50), (8, 15))
 
         self.tilemap = Tilemap(self, 16)
 
