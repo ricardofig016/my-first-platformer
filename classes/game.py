@@ -21,7 +21,7 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
-        self.movement = [False, False]
+        self.movement = [False, False]  # left, right
 
         self.assets = {
             "decor": load_images("tiles/decor"),
