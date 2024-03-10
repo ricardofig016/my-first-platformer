@@ -41,6 +41,7 @@ class Editor:
         self.left_clicking = False
         self.right_clicking = False
         self.shift = False
+        self.on_grid = True
 
         self.total_elapsed_time = [0, 0]
 
@@ -74,16 +75,19 @@ class Editor:
 
             # tile preview
             if not self.right_clicking:
-                self.display.blit(
-                    current_tile_image,
-                    (
-                        tile_pos[0] * self.tilemap.tile_size - self.scroll[0],
-                        tile_pos[1] * self.tilemap.tile_size - self.scroll[1],
-                    ),
-                )
+                if self.on_grid:
+                    self.display.blit(
+                        current_tile_image,
+                        (
+                            tile_pos[0] * self.tilemap.tile_size - self.scroll[0],
+                            tile_pos[1] * self.tilemap.tile_size - self.scroll[1],
+                        ),
+                    )
+                else:
+                    self.display.blit(current_tile_image, mouse_pos)
 
             # place tiles
-            if self.left_clicking:
+            if self.left_clicking and self.on_grid:
                 self.tilemap.tilemap[f"{tile_pos[0]};{tile_pos[1]}"] = {
                     "type": self.tile_list[self.tile_group],
                     "variant": self.tile_variant,
@@ -95,6 +99,16 @@ class Editor:
                 key = f"{tile_pos[0]};{tile_pos[1]}"
                 if key in self.tilemap.tilemap:
                     del self.tilemap.tilemap[key]
+                for tile in self.tilemap.offgrid_tiles.copy():
+                    tile_img = self.assets[tile["type"]][tile["variant"]]
+                    tile_rect = pygame.Rect(
+                        tile["pos"][0] - self.scroll[0],
+                        tile["pos"][1] - self.scroll[1],
+                        tile_img.get_width(),
+                        tile_img.get_height(),
+                    )
+                    if tile_rect.collidepoint(mouse_pos):
+                        self.tilemap.offgrid_tiles.remove(tile)
 
             self.display.blit(current_tile_image, (5, 5))
 
@@ -105,6 +119,17 @@ class Editor:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # left click
                         self.left_clicking = True
+                        if not self.on_grid:
+                            self.tilemap.offgrid_tiles.append(
+                                {
+                                    "type": self.tile_list[self.tile_group],
+                                    "variant": self.tile_variant,
+                                    "pos": (
+                                        mouse_pos[0] + self.scroll[0],
+                                        mouse_pos[1] + self.scroll[1],
+                                    ),
+                                }
+                            )
                     if event.button == 3:  # right click
                         self.right_clicking = True
                     if self.shift:
@@ -154,6 +179,8 @@ class Editor:
                         self.movement[3] = True
                     elif event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
                         self.shift = True
+                    elif event.key == pygame.K_g:
+                        self.on_grid = not self.on_grid
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:
