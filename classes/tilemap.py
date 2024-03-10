@@ -67,18 +67,28 @@ class Tilemap:
         return rects
 
     def render(self, surface, offset=(0, 0)):
+        # render only the tiles that will be on screen
+        for x in range(
+            offset[0] // self.tile_size,
+            (offset[0] + surface.get_width()) // self.tile_size + 1,
+        ):
+            for y in range(
+                offset[1] // self.tile_size,
+                (offset[1] + surface.get_height()) // self.tile_size + 1,
+            ):
+                key = f"{x};{y}"
+                if key in self.tilemap:
+                    tile = self.tilemap[key]
+                    surface.blit(
+                        self.game.assets[tile["type"]][tile["variant"]],
+                        (
+                            tile["pos"][0] * self.tile_size - offset[0],
+                            tile["pos"][1] * self.tile_size - offset[1],
+                        ),
+                    )
+
         for tile in self.offgrid_tiles:
             surface.blit(
                 self.game.assets[tile["type"]][tile["variant"]],
                 (tile["pos"][0] - offset[0], tile["pos"][1] - offset[1]),
-            )
-
-        for key in self.tilemap:
-            tile = self.tilemap[key]
-            surface.blit(
-                self.game.assets[tile["type"]][tile["variant"]],
-                (
-                    tile["pos"][0] * self.tile_size - offset[0],
-                    tile["pos"][1] * self.tile_size - offset[1],
-                ),
             )
