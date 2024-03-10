@@ -70,6 +70,16 @@ class Editor:
                 int((mouse_pos[1] + self.scroll[1]) // self.tilemap.tile_size),
             )  # tilemap mouse pos
 
+            # tile preview
+            if not self.right_clicking:
+                self.display.blit(
+                    current_tile_image,
+                    (
+                        tile_pos[0] * self.tilemap.tile_size - self.scroll[1],
+                        tile_pos[1] * self.tilemap.tile_size - self.scroll[1],
+                    ),
+                )
+
             # place tiles
             if self.left_clicking:
                 self.tilemap.tilemap[f"{tile_pos[0]};{tile_pos[1]}"] = {
