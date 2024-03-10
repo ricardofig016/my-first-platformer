@@ -1,5 +1,7 @@
 import pygame
 
+from icecream import ic
+
 
 NEIGHBOR_OFFSETS = [
     (-1, -1),
@@ -12,7 +14,7 @@ NEIGHBOR_OFFSETS = [
     (1, 0),
     (1, 1),
 ]
-PHYSICS_TILES = {"grass", "stone"}
+PHYSICS_TILES = ["grass", "stone"]
 
 
 class Tilemap:
@@ -42,7 +44,7 @@ class Tilemap:
             check_location = (
                 str(tile_location[0] + offset[0])
                 + ";"
-                + str(tile_location[0] + offset[0])
+                + str(tile_location[1] + offset[1])
             )
             if check_location in self.tilemap:
                 tiles.append(self.tilemap[check_location])
