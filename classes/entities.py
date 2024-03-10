@@ -52,5 +52,8 @@ class PhysicsEntity:
 
         self.velocity[1] = min(5, self.velocity[1] + 0.1)  # 5 is the terminal velocity
 
-    def render(self, surface):
-        surface.blit(self.game.assets["player"], self.pos)
+    def render(self, surface, offset=(0, 0)):
+        surface.blit(
+            self.game.assets["player"],
+            (self.pos[0] - offset[0], self.pos[1] - offset[1]),
+        )
