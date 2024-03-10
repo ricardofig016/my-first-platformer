@@ -6,6 +6,7 @@ from icecream import ic
 from scripts.utils import load_image, load_images
 from classes.entities import PhysicsEntity
 from classes.tilemap import Tilemap
+from classes.clouds import Clouds
 
 
 class Game:
@@ -27,7 +28,10 @@ class Game:
             "stone": load_images("tiles/stone"),
             "player": load_image("entities/player.png"),
             "background": load_image("background.png"),
+            "clouds": load_images("clouds"),
         }
+
+        self.clouds = Clouds(self.assets["clouds"], 16)
 
         self.player = PhysicsEntity(self, "player", (50, 50), (8, 15))
 
@@ -50,6 +54,9 @@ class Game:
                 - self.scroll[1]
             ) / 30
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
+
+            self.clouds.update()
+            self.clouds.render(self.display, render_scroll)
 
             self.tilemap.render(self.display, render_scroll)
 
