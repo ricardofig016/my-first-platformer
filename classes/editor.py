@@ -51,6 +51,8 @@ class Editor:
 
             self.display.fill((0, 0, 0))
 
+            self.scroll[0] += (self.movement[1] - self.movement[0]) * 2
+            self.scroll[1] += (self.movement[3] - self.movement[2]) * 2
             render_scroll = render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
             self.tilemap.render(self.display, render_scroll)
@@ -75,7 +77,7 @@ class Editor:
                 self.display.blit(
                     current_tile_image,
                     (
-                        tile_pos[0] * self.tilemap.tile_size - self.scroll[1],
+                        tile_pos[0] * self.tilemap.tile_size - self.scroll[0],
                         tile_pos[1] * self.tilemap.tile_size - self.scroll[1],
                     ),
                 )
