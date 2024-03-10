@@ -24,21 +24,6 @@ class Tilemap:
         self.tilemap = {}
         self.offgrid_tiles = []
 
-        # mock tilemap
-        for i in range(10):
-            self.tilemap[str(3 + i) + ";10"] = {
-                "type": "grass",
-                "variant": 1,
-                "pos": (3 + i, 10),
-            }
-            self.tilemap["10;" + str(5 + i)] = {
-                "type": "stone",
-                "variant": 1,
-                "pos": (10, 5 + i),
-            }
-            self.tilemap["5;9"] = {"type": "decor", "variant": 2, "pos": (5, 9)}
-            self.tilemap["9;9"] = {"type": "decor", "variant": 3, "pos": (9, 9)}
-
     def tiles_around(self, pos):
         tiles = []
         tile_location = (int(pos[0] // self.tile_size), int(pos[1] // self.tile_size))
