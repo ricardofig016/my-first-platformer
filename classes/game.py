@@ -1,5 +1,6 @@
 import sys
 import pygame
+import time
 
 from icecream import ic
 
@@ -39,8 +40,13 @@ class Game:
 
         self.scroll = [0, 0]
 
+        self.total_elapsed_time = [0, 0]
+
     def run(self):
         while True:
+            # calculate elapsed time per frame
+            start_time = time.time()
+
             self.display.blit(self.assets["background"], (0, 0))
 
             self.scroll[0] += (
@@ -65,12 +71,10 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    self.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
+                        self.exit()
                     elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         self.movement[0] = True
                     elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
@@ -89,4 +93,16 @@ class Game:
                 pygame.transform.scale(self.display, self.screen.get_size()), (0, 0)
             )
             pygame.display.update()
+
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            self.total_elapsed_time[0] += elapsed_time
+            self.total_elapsed_time[1] += 1
+
             self.clock.tick(60)
+
+    def exit(self):
+        average_elapsed_time = self.total_elapsed_time[0] / self.total_elapsed_time[1]
+        ic(average_elapsed_time)
+        pygame.quit()
+        sys.exit()
