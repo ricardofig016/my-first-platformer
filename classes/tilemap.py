@@ -37,6 +37,7 @@ class Tilemap:
                 "pos": (10, 5 + i),
             }
             self.tilemap["5;9"] = {"type": "decor", "variant": 2, "pos": (5, 9)}
+            self.tilemap["9;9"] = {"type": "decor", "variant": 3, "pos": (9, 9)}
 
     def tiles_around(self, pos):
         tiles = []
