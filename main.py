@@ -1,9 +1,11 @@
+import sys
+
 from classes.game import Game
-
-
-def run():
-    Game().run()
+from classes.editor import Editor
 
 
 if __name__ == "__main__":
-    run()
+    if "-editor" in sys.argv:
+        Editor().run()
+    else:
+        Game().run()
