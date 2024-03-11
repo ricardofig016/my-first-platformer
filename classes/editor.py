@@ -15,7 +15,9 @@ class Editor:
     def __init__(self, tilemap_name="") -> None:
         pygame.init()
 
-        pygame.display.set_caption("editor")
+        pygame.display.set_caption(
+            "editor" if not tilemap_name else f"editor - {tilemap_name}"
+        )
         self.screen = pygame.display.set_mode((640, 480))
         self.display = pygame.Surface((320, 240))
 
@@ -185,14 +187,16 @@ class Editor:
                         self.movement[3] = True
                     elif event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
                         self.shift = True
-                    elif event.key == pygame.K_g:
+                    elif event.key == pygame.K_g:  # on/off offgrid_tiles
                         self.on_grid = not self.on_grid
-                    elif event.key == pygame.K_o:
+                    elif event.key == pygame.K_o:  # save tilemap
                         if self.tilemap_name:
                             self.tilemap.save(self.tilemap_name)
                         else:
                             self.tilemap.save(input("Save new map as: "))
                         print("Map successfully saved.")
+                    elif event.key == pygame.K_t:  # autotile
+                        self.tilemap.autotile()
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:

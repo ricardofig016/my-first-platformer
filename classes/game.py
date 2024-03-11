@@ -43,6 +43,7 @@ class Game:
         self.player = Player(self, (50, 50), (8, 15))
 
         self.tilemap = Tilemap(self, 16)
+        self.tilemap.load("mock_map")
 
         self.scroll = [0, 0]
 

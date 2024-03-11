@@ -16,9 +16,19 @@ NEIGHBOR_OFFSETS = [
     (1, 0),
     (1, 1),
 ]
-
 PHYSICS_TILES = {"grass", "stone"}
-
+AUTOTILE_TYPES = {"grass", "stone"}
+AUTOTILE_MAP = {
+    tuple(sorted([(1, 0), (0, 1)])): 0,
+    tuple(sorted([(1, 0), (0, 1), (-1, 0)])): 1,
+    tuple(sorted([(0, 1), (-1, 0)])): 2,
+    tuple(sorted([(0, 1), (-1, 0), (0, -1)])): 3,
+    tuple(sorted([(0, -1), (-1, 0)])): 4,
+    tuple(sorted([(0, -1), (-1, 0), (1, 0)])): 5,
+    tuple(sorted([(0, -1), (1, 0)])): 6,
+    tuple(sorted([(0, -1), (1, 0), (0, 1)])): 7,
+    tuple(sorted([(0, -1), (1, 0), (0, 1), (-1, 0)])): 8,
+}
 BASE_MAP_PATH = "data/maps/"
 
 
@@ -55,6 +65,21 @@ class Tilemap:
                     )
                 )
         return rects
+
+    def autotile(self):
+        for key in self.tilemap:
+            tile = self.tilemap[key]
+            neighbors = set()
+            for shift in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                shifted_pos = f"{tile['pos'][0]+shift[0]};{tile['pos'][1]+shift[1]}"
+                if (
+                    shifted_pos in self.tilemap
+                    and self.tilemap[shifted_pos]["type"] == tile["type"]
+                ):
+                    neighbors.add(shift)
+            neighbors = tuple(sorted(neighbors))
+            if tile["type"] in AUTOTILE_TYPES and (neighbors in AUTOTILE_MAP):
+                tile["variant"] = AUTOTILE_MAP[neighbors]
 
     def render(self, surface, offset=(0, 0)):
         for tile in self.offgrid_tiles:
