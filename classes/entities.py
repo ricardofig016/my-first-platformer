@@ -10,6 +10,7 @@ class PhysicsEntity:
         self.pos = list(pos)
         self.size = size
         self.velocity = [0, 0]
+        self.last_movement = [0, 0]
         self.collisions = {"up": False, "down": False, "right": False, "left": False}
 
         self.action = ""
@@ -62,10 +63,14 @@ class PhysicsEntity:
         if movement[0] < 0:
             self.flip = True
 
-        self.velocity[1] = min(5, self.velocity[1] + 0.1)  # 5 is the terminal velocity
+        self.velocity[1] = min(
+            5, self.velocity[1] + 0.1
+        )  # 5 is the terminal downwards velocity
 
         if self.collisions["down"] or self.collisions["up"]:
             self.velocity[1] = 0
+
+        self.last_movement = list(movement)
 
         self.animation.update()
 
@@ -83,6 +88,8 @@ class Player(PhysicsEntity):
     def __init__(self, game, pos, size) -> None:
         super().__init__(game, "player", pos, size)
         self.air_time = 0
+        self.available_jumps = 1
+        self.wall_slide = False
 
     def update(self, tilemap, movement=(0, 0)):
         super().update(tilemap, movement)
@@ -90,10 +97,49 @@ class Player(PhysicsEntity):
         self.air_time += 1
         if self.collisions["down"]:
             self.air_time = 0
+            self.available_jumps = 1
 
-        if self.air_time >= 5:  # player has been in the air for 5 frames
+        self.wall_slide = False
+        if (
+            (self.collisions["left"] or self.collisions["right"])
+            and self.air_time > 4
+            and self.velocity[1] > 0
+        ):
+            self.wall_slide = True
+            # 0.5 is the terminal downwards velocity while wall sliding
+            self.velocity[1] = min(0.5, self.velocity[1])
+            self.flip = self.collisions["left"]
+            self.set_action("wall_slide")
+        elif self.air_time >= 5:  # player has been in the air for 5 frames
             self.set_action("jump")
         elif movement[0] != 0:
             self.set_action("run")
         else:
             self.set_action("idle")
+
+        # air resistance
+        if self.velocity[0] > 0:
+            self.velocity[0] = max(0, self.velocity[0] - 0.1)
+        elif self.velocity[0] < 0:
+            self.velocity[0] = min(0, self.velocity[0] + 0.1)
+
+    def jump(self):
+        if self.wall_slide:
+            if self.flip and self.last_movement[0] < 0:
+                self.available_jumps -= 1
+                self.velocity = [3, -2.5]
+                self.air_time = 5
+                return True
+            elif not self.flip and self.last_movement[0] > 0:
+                self.available_jumps -= 1
+                self.velocity = [-3, -2.5]
+                self.air_time = 5
+                return True
+
+        elif self.available_jumps > 0:
+            self.available_jumps -= 1
+            self.velocity[1] = -3.1
+            self.air_time = 5
+            return True
+
+        return False

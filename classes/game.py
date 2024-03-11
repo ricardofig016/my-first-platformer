@@ -124,7 +124,7 @@ class Game:
                     elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         self.movement[1] = True
                     elif event.key == pygame.K_UP or event.key == pygame.K_w:
-                        self.player.velocity[1] = -3.1
+                        self.player.jump()
                     elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                         pass
                 if event.type == pygame.KEYUP:
