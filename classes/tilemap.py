@@ -1,4 +1,6 @@
+import os
 import pygame
+import json
 
 from icecream import ic
 
@@ -14,7 +16,10 @@ NEIGHBOR_OFFSETS = [
     (1, 0),
     (1, 1),
 ]
+
 PHYSICS_TILES = {"grass", "stone"}
+
+BASE_MAP_PATH = "data/maps/"
 
 
 class Tilemap:
@@ -52,6 +57,12 @@ class Tilemap:
         return rects
 
     def render(self, surface, offset=(0, 0)):
+        for tile in self.offgrid_tiles:
+            surface.blit(
+                self.game.assets[tile["type"]][tile["variant"]],
+                (tile["pos"][0] - offset[0], tile["pos"][1] - offset[1]),
+            )
+
         # render only the tiles that will be on screen
         for x in range(
             offset[0] // self.tile_size,
@@ -72,8 +83,21 @@ class Tilemap:
                         ),
                     )
 
-        for tile in self.offgrid_tiles:
-            surface.blit(
-                self.game.assets[tile["type"]][tile["variant"]],
-                (tile["pos"][0] - offset[0], tile["pos"][1] - offset[1]),
+    def save(self, map_name):
+        with open(os.path.join(BASE_MAP_PATH, f"{map_name}.json"), "w") as file:
+            json.dump(
+                {
+                    "tilemap": self.tilemap,
+                    "tile_size": self.tile_size,
+                    "offgrid": self.offgrid_tiles,
+                },
+                file,
             )
+
+    def load(self, map_name):
+        with open(os.path.join(BASE_MAP_PATH, f"{map_name}.json"), "r") as file:
+            data = json.load(file)
+
+        self.tilemap = data["tilemap"]
+        self.tile_size = data["tile_size"]
+        self.offgrid_tiles = data["offgrid"]

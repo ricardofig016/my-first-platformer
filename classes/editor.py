@@ -12,7 +12,7 @@ RENDER_SCALE = 2.0
 
 
 class Editor:
-    def __init__(self) -> None:
+    def __init__(self, tilemap_name="") -> None:
         pygame.init()
 
         pygame.display.set_caption("editor")
@@ -31,6 +31,12 @@ class Editor:
         self.movement = [False, False, False, False]  # left, right, up, down
 
         self.tilemap = Tilemap(self, 16)
+
+        self.tilemap_name = tilemap_name
+        try:
+            self.tilemap.load(self.tilemap_name)
+        except FileNotFoundError:
+            pass
 
         self.scroll = [0, 0]
 
@@ -181,6 +187,12 @@ class Editor:
                         self.shift = True
                     elif event.key == pygame.K_g:
                         self.on_grid = not self.on_grid
+                    elif event.key == pygame.K_o:
+                        if self.tilemap_name:
+                            self.tilemap.save(self.tilemap_name)
+                        else:
+                            self.tilemap.save(input("Save new map as: "))
+                        print("Map successfully saved.")
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:

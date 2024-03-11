@@ -5,7 +5,11 @@ from classes.editor import Editor
 
 
 if __name__ == "__main__":
-    if "-editor" in sys.argv:
-        Editor().run()
+    if "--editor" in sys.argv:
+        try:
+            map_name = sys.argv[sys.argv.index("--editor") + 1]
+        except:
+            map_name = ""
+        Editor(map_name).run()
     else:
         Game().run()
