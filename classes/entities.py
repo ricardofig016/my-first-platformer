@@ -100,11 +100,7 @@ class Player(PhysicsEntity):
             self.available_jumps = 1
 
         self.wall_slide = False
-        if (
-            (self.collisions["left"] or self.collisions["right"])
-            and self.air_time > 4
-            and self.velocity[1] > 0
-        ):
+        if (self.collisions["left"] or self.collisions["right"]) and self.air_time > 4:
             self.wall_slide = True
             # 0.5 is the terminal downwards velocity while wall sliding
             self.velocity[1] = min(0.5, self.velocity[1])
@@ -127,12 +123,12 @@ class Player(PhysicsEntity):
         if self.wall_slide:
             if self.flip and self.last_movement[0] < 0:
                 self.available_jumps -= 1
-                self.velocity = [3, -2.5]
+                self.velocity = [3.5, -2.5]
                 self.air_time = 5
                 return True
             elif not self.flip and self.last_movement[0] > 0:
                 self.available_jumps -= 1
-                self.velocity = [-3, -2.5]
+                self.velocity = [-3.5, -2.5]
                 self.air_time = 5
                 return True
 

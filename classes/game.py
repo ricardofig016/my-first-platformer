@@ -123,7 +123,11 @@ class Game:
                         self.movement[0] = True
                     elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         self.movement[1] = True
-                    elif event.key == pygame.K_UP or event.key == pygame.K_w:
+                    elif (
+                        event.key == pygame.K_UP
+                        or event.key == pygame.K_w
+                        or event.key == pygame.K_SPACE
+                    ):
                         self.player.jump()
                     elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                         pass
