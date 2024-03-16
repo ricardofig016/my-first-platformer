@@ -8,10 +8,13 @@ from icecream import ic
 
 from scripts.utils import load_image, load_images
 from classes.tilemap import Tilemap
-from classes.entities import PhysicsEntity, Player
+from classes.entities import Player, Enemy
 from classes.clouds import Clouds
 from classes.animations import Animation
 from classes.particle import Particle
+
+PLAYER_SIZE = (8, 15)
+ENEMY_SIZE = (8, 15)
 
 
 class Game:
@@ -31,7 +34,6 @@ class Game:
             "grass": load_images("tiles/grass"),
             "large_decor": load_images("tiles/large_decor"),
             "stone": load_images("tiles/stone"),
-            "player": load_image("entities/player.png"),
             "background": load_image("background.png"),
             "clouds": load_images("clouds"),
             "player/idle": Animation(load_images("entities/player/idle"), 6),
@@ -39,21 +41,29 @@ class Game:
             "player/run": Animation(load_images("entities/player/run"), 4),
             "player/slide": Animation(load_images("entities/player/slide")),
             "player/wall_slide": Animation(load_images("entities/player/wall_slide")),
+            "enemy/idle": Animation(load_images("entities/enemy/idle"), 6),
+            "enemy/run": Animation(load_images("entities/enemy/run"), 4),
             "particle/leaf": Animation(load_images("particles/leaf"), 20, False),
             "particle/particle": Animation(load_images("particles/particle"), 6, False),
         }
 
         self.clouds = Clouds(self.assets["clouds"], 16)
 
-        self.player = Player(self, (50, 50), (8, 15))
-
         self.tilemap = Tilemap(self, 16)
         self.tilemap.load("mock_map")
 
-        self.leaf_spawners = [
+        # spawners
+        self.leaf_spawners = []
+        for tree in self.tilemap.extract([("large_decor", 2)], True):
             pygame.Rect(tree["pos"][0] + 4, tree["pos"][1] + 4, 23, 13)
-            for tree in self.tilemap.extract([("large_decor", 2)], True)
-        ]
+
+        self.player = Player(self, (0, 0), PLAYER_SIZE)
+        self.enemies = []
+        for spawner in self.tilemap.extract([("spawners", 0), ("spawners", 1)], False):
+            if spawner["variant"] == 0:  # player
+                self.player.pos = spawner["pos"]
+            else:
+                self.enemies.append(Enemy(self, spawner["pos"], ENEMY_SIZE))
 
         self.particles = []
 
@@ -105,6 +115,10 @@ class Game:
 
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display, render_scroll)
+
+            for enemy in self.enemies.copy():
+                enemy.update(self.tilemap, (0, 0))
+                enemy.render(self.display, render_scroll)
 
             for particle in self.particles.copy():
                 kill = particle.update()
