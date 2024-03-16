@@ -43,6 +43,7 @@ class Game:
             "player/wall_slide": Animation(load_images("entities/player/wall_slide")),
             "enemy/idle": Animation(load_images("entities/enemy/idle"), 6),
             "enemy/run": Animation(load_images("entities/enemy/run"), 4),
+            "gun": load_image("gun.png"),
             "particle/leaf": Animation(load_images("particles/leaf"), 20, False),
             "particle/particle": Animation(load_images("particles/particle"), 6, False),
         }

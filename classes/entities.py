@@ -231,3 +231,24 @@ class Enemy(PhysicsEntity):
             self.set_action("run")
         else:
             self.set_action("idle")
+
+    def render(self, surface, offset=(0, 0)):
+        super().render(surface, offset)
+
+        # render gun
+        if self.flip:
+            surface.blit(
+                pygame.transform.flip(self.game.assets["gun"], True, False),
+                (
+                    self.rect().centerx
+                    - 4
+                    - self.game.assets["gun"].get_width()
+                    - offset[0],
+                    self.rect().centery - offset[1],
+                ),
+            )
+        else:
+            surface.blit(
+                self.game.assets["gun"],
+                (self.rect().centerx + 4 - offset[0], self.rect().centery - offset[1]),
+            )
