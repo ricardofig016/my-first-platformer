@@ -87,6 +87,12 @@ class Tilemap:
                 )
         return rects
 
+    def is_solid(self, pos):
+        key = f"{int(pos[0]//self.tile_size)};{int(pos[1]//self.tile_size)}"
+        if key in self.tilemap and self.tilemap[key]["type"] in PHYSICS_TILES:
+            return True
+        return False
+
     def autotile(self):
         for key in self.tilemap:
             tile = self.tilemap[key]
