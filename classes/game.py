@@ -44,6 +44,7 @@ class Game:
             "enemy/idle": Animation(load_images("entities/enemy/idle"), 6),
             "enemy/run": Animation(load_images("entities/enemy/run"), 4),
             "gun": load_image("gun.png"),
+            "projectile": load_image("projectile.png"),
             "particle/leaf": Animation(load_images("particles/leaf"), 20, False),
             "particle/particle": Animation(load_images("particles/particle"), 6, False),
         }
@@ -65,6 +66,8 @@ class Game:
                 self.player.pos = spawner["pos"]
             else:
                 self.enemies.append(Enemy(self, spawner["pos"], ENEMY_SIZE))
+
+        self.projectiles = []
 
         self.particles = []
 
@@ -120,6 +123,29 @@ class Game:
             for enemy in self.enemies.copy():
                 enemy.update(self.tilemap, (0, 0))
                 enemy.render(self.display, render_scroll)
+
+            # projectiles are very simple so we dont need a class
+            # [[x, y], direction, timer]
+            for projectile in self.projectiles.copy():
+                projectile[0][0] += projectile[1]  # x += direction
+                projectile[2] += 1  # timer += 1
+                img = self.assets["projectile"]
+                # render
+                self.display.blit(
+                    img,
+                    (
+                        projectile[0][0] - img.get_width() / 2 - render_scroll[0],
+                        projectile[0][1] - img.get_height() / 2 - render_scroll[1],
+                    ),
+                )
+                # delete the projectile if it hits a wall OR it is too far away
+                if self.tilemap.is_solid(projectile[0]) or projectile[2] > 400:
+                    self.projectiles.remove(projectile)
+                # kill the player if they are not dashing AND they are hit
+                elif abs(self.player.dashing) < 50 and self.player.rect().collidepoint(
+                    projectile[0]
+                ):
+                    self.projectiles.remove(projectile)
 
             for particle in self.particles.copy():
                 kill = particle.update()
