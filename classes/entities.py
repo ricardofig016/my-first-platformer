@@ -101,6 +101,10 @@ class Player(PhysicsEntity):
         super().update(tilemap, movement)
 
         self.air_time += 1
+
+        if self.air_time > 240:
+            self.game.dead_for += 40
+
         if self.collisions["down"]:
             self.air_time = 0
             self.available_jumps = 1
