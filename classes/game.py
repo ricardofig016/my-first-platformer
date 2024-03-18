@@ -84,6 +84,7 @@ class Game:
         self.sparks = []
         self.particles = []
 
+        self.do_dash = False
         self.dead_for = 0
 
     def run(self):
@@ -140,6 +141,10 @@ class Game:
                     self.tilemap, (self.movement[1] - self.movement[0], 0)
                 )
                 self.player.render(self.display, render_scroll)
+
+            if self.do_dash:
+                self.do_dash = False
+                self.player.dash()
 
             for enemy in self.enemies.copy():
                 kill = enemy.update(self.tilemap, (0, 0))
@@ -242,7 +247,7 @@ class Game:
                     if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                         pass
                     if event.key == pygame.K_x:
-                        self.player.dash()
+                        self.do_dash = True
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         self.movement[0] = False
