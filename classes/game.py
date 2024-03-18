@@ -229,24 +229,24 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.exit()
-                    elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         self.movement[0] = True
-                    elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         self.movement[1] = True
-                    elif (
+                    if (
                         event.key == pygame.K_UP
                         or event.key == pygame.K_w
                         or event.key == pygame.K_SPACE
                     ):
                         self.player.jump()
-                    elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                         pass
-                    elif event.key == pygame.K_x:
+                    if event.key == pygame.K_x:
                         self.player.dash()
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         self.movement[0] = False
-                    elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         self.movement[1] = False
 
             self.screen.blit(
