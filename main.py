@@ -11,5 +11,11 @@ if __name__ == "__main__":
         except:
             map_name = ""
         Editor(map_name).run()
+    elif "--custom-map" in sys.argv:
+        try:
+            map_name = sys.argv[sys.argv.index("--custom-map") + 1]
+        except:
+            map_name = ""
+        Game(map_name).run()
     else:
         Game().run()
