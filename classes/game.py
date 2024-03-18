@@ -130,8 +130,10 @@ class Game:
             self.player.render(self.display, render_scroll)
 
             for enemy in self.enemies.copy():
-                enemy.update(self.tilemap, (0, 0))
+                kill = enemy.update(self.tilemap, (0, 0))
                 enemy.render(self.display, render_scroll)
+                if kill:
+                    self.enemies.remove(enemy)
 
             # projectiles are very simple so we dont need a class
             # [[x, y], direction, timer]
@@ -167,6 +169,7 @@ class Game:
                 elif abs(self.player.dashing) < 50 and self.player.rect().collidepoint(
                     projectile[0]
                 ):
+                    # effects for death
                     for i in range(30):
                         angle = random.random() * math.pi * 2
                         speed = random.random() * 5

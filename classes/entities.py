@@ -268,6 +268,42 @@ class Enemy(PhysicsEntity):
         else:
             self.set_action("idle")
 
+        # collision with player while they're dashing
+        if abs(self.game.player.dashing) >= 50 and self.rect().colliderect(
+            self.game.player.rect()
+        ):
+            # effects for death
+            for i in range(30):
+                angle = random.random() * math.pi * 2
+                speed = random.random() * 5
+                self.game.sparks.append(
+                    Spark(
+                        self.rect().center,
+                        angle,
+                        random.random() + 2,
+                    )
+                )
+                self.game.particles.append(
+                    Particle(
+                        self.game,
+                        "particle",
+                        self.rect().center,
+                        [
+                            math.cos(angle + math.pi) * speed * 0.5,
+                            math.sin(angle + math.pi) * speed * 0.5,
+                        ],
+                        random.randint(
+                            0, len(self.game.assets["particle/particle"].images) - 1
+                        ),
+                    )
+                )
+            self.game.sparks.append(Spark(self.rect().center, 0, random.random() + 4))
+            self.game.sparks.append(
+                Spark(self.rect().center, math.pi, random.random() + 4)
+            )
+            return True  # the enemy will be killed
+        return False
+
     def render(self, surface, offset=(0, 0)):
         super().render(surface, offset)
 
