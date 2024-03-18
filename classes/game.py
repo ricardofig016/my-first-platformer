@@ -54,15 +54,17 @@ class Game:
 
         self.tilemap = Tilemap(self, 16)
         if tilemap_name:
-            self.load_level(tilemap_name)
+            self.map_name = tilemap_name
         else:
-            self.level = 0
-            self.load_level(self.level)
+            self.map_name = 0
+        self.load_level()
+
+        self.scroll = [0, 0]
 
         self.total_elapsed_time = [0, 0]
 
-    def load_level(self, map_id):
-        self.tilemap.load(map_id)
+    def load_level(self):
+        self.tilemap.load(self.map_name)
 
         self.leaf_spawners = []
         for tree in self.tilemap.extract([("large_decor", 2)], True):
@@ -82,12 +84,19 @@ class Game:
         self.sparks = []
         self.particles = []
 
-        self.scroll = [0, 0]
+        self.dead_for = 0
 
     def run(self):
         while True:
             # calculate elapsed time per frame
             start_time = time.time()
+
+            # player is dead
+            if self.dead_for:
+                # player died 40 frames ago
+                self.dead_for += 1
+                if self.dead_for > 40:
+                    self.load_level()
 
             self.display.blit(self.assets["background"], (0, 0))
 
@@ -126,8 +135,11 @@ class Game:
 
             self.tilemap.render(self.display, render_scroll)
 
-            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display, render_scroll)
+            if not self.dead_for:
+                self.player.update(
+                    self.tilemap, (self.movement[1] - self.movement[0], 0)
+                )
+                self.player.render(self.display, render_scroll)
 
             for enemy in self.enemies.copy():
                 kill = enemy.update(self.tilemap, (0, 0))
@@ -195,6 +207,7 @@ class Game:
                             )
                         )
                     self.projectiles.remove(projectile)
+                    self.dead_for = 1
 
             for spark in self.sparks.copy():
                 kill = spark.update()
