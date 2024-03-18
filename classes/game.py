@@ -12,13 +12,14 @@ from classes.entities import Player, Enemy
 from classes.clouds import Clouds
 from classes.animations import Animation
 from classes.particle import Particle
+from classes.spark import Spark
 
 PLAYER_SIZE = (8, 15)
 ENEMY_SIZE = (8, 15)
 
 
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, tilemap_name="") -> None:
         pygame.init()
 
         pygame.display.set_caption("my first platformer")
@@ -52,12 +53,22 @@ class Game:
         self.clouds = Clouds(self.assets["clouds"], 16)
 
         self.tilemap = Tilemap(self, 16)
-        self.tilemap.load("mock_map")
+        if tilemap_name:
+            self.load_level(tilemap_name)
+        else:
+            self.level = 0
+            self.load_level(self.level)
 
-        # spawners
+        self.total_elapsed_time = [0, 0]
+
+    def load_level(self, map_id):
+        self.tilemap.load(map_id)
+
         self.leaf_spawners = []
         for tree in self.tilemap.extract([("large_decor", 2)], True):
-            pygame.Rect(tree["pos"][0] + 4, tree["pos"][1] + 4, 23, 13)
+            self.leaf_spawners.append(
+                pygame.Rect(tree["pos"][0] + 4, tree["pos"][1] + 4, 23, 13)
+            )
 
         self.player = Player(self, (0, 0), PLAYER_SIZE)
         self.enemies = []
@@ -68,12 +79,10 @@ class Game:
                 self.enemies.append(Enemy(self, spawner["pos"], ENEMY_SIZE))
 
         self.projectiles = []
-
+        self.sparks = []
         self.particles = []
 
         self.scroll = [0, 0]
-
-        self.total_elapsed_time = [0, 0]
 
     def run(self):
         while True:
@@ -138,14 +147,57 @@ class Game:
                         projectile[0][1] - img.get_height() / 2 - render_scroll[1],
                     ),
                 )
-                # delete the projectile if it hits a wall OR it is too far away
-                if self.tilemap.is_solid(projectile[0]) or projectile[2] > 400:
+                # the projectile hits a wall
+                if self.tilemap.is_solid(projectile[0]):
                     self.projectiles.remove(projectile)
-                # kill the player if they are not dashing AND they are hit
+                    for i in range(4):
+                        self.sparks.append(
+                            Spark(
+                                projectile[0],
+                                random.random()
+                                - 0.5
+                                + (math.pi if projectile[1] > 0 else 0),
+                                random.random() + 2,
+                            )
+                        )
+                # the projectile is is far away
+                if projectile[2] > 400:
+                    self.projectiles.remove(projectile)
+                # player is not dashing AND is hit
                 elif abs(self.player.dashing) < 50 and self.player.rect().collidepoint(
                     projectile[0]
                 ):
+                    for i in range(30):
+                        angle = random.random() * math.pi * 2
+                        speed = random.random() * 5
+                        self.sparks.append(
+                            Spark(
+                                self.player.rect().center,
+                                angle,
+                                random.random() + 2,
+                            )
+                        )
+                        self.particles.append(
+                            Particle(
+                                self,
+                                "particle",
+                                self.player.rect().center,
+                                [
+                                    math.cos(angle + math.pi) * speed * 0.5,
+                                    math.sin(angle + math.pi) * speed * 0.5,
+                                ],
+                                random.randint(
+                                    0, len(self.assets["particle/particle"].images) - 1
+                                ),
+                            )
+                        )
                     self.projectiles.remove(projectile)
+
+            for spark in self.sparks.copy():
+                kill = spark.update()
+                spark.render(self.display, render_scroll)
+                if kill:
+                    self.sparks.remove(spark)
 
             for particle in self.particles.copy():
                 kill = particle.update()

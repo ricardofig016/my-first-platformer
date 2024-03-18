@@ -5,6 +5,7 @@ import random
 from icecream import ic
 
 from classes.particle import Particle
+from classes.spark import Spark
 
 
 class PhysicsEntity:
@@ -235,11 +236,27 @@ class Enemy(PhysicsEntity):
                         self.game.projectiles.append(
                             [[self.rect().centerx - 7, self.rect().centery], -2, 0]
                         )
+                        for i in range(4):
+                            self.game.sparks.append(
+                                Spark(
+                                    self.game.projectiles[-1][0],
+                                    random.random() - 0.5 + math.pi,
+                                    random.random() + 2,
+                                )
+                            )
                     # enemy is looking RIGHT AND player is at the enemy's RIGHT
                     elif not self.flip and distance_to_player[0] > 0:
                         self.game.projectiles.append(
                             [[self.rect().centerx + 7, self.rect().centery], 2, 0]
                         )
+                        for i in range(4):
+                            self.game.sparks.append(
+                                Spark(
+                                    self.game.projectiles[-1][0],
+                                    random.random() - 0.5,
+                                    random.random() + 2,
+                                )
+                            )
 
         elif random.random() < 0.01:
             self.walking = random.randint(30, 120)
