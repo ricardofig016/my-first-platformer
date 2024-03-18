@@ -261,12 +261,13 @@ class Enemy(PhysicsEntity):
                                     random.random() + 2,
                                 )
                             )
-
+        # 1% chance to start walking
         elif random.random() < 0.01:
             self.walking = random.randint(30, 120)
 
         super().update(tilemap, movement)
 
+        # actions
         if movement[0] != 0:
             self.set_action("run")
         else:
@@ -277,6 +278,7 @@ class Enemy(PhysicsEntity):
             self.game.player.rect()
         ):
             # effects for death
+            self.game.screenshake = max(20, self.game.screenshake)
             for i in range(30):
                 angle = random.random() * math.pi * 2
                 speed = random.random() * 5

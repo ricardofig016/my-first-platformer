@@ -60,6 +60,7 @@ class Game:
         self.load_level()
 
         self.scroll = [0, 0]
+        self.screenshake = 0
 
         self.total_elapsed_time = [0, 0]
 
@@ -99,8 +100,10 @@ class Game:
                 if self.dead_for > 40:
                     self.load_level()
 
+            # background
             self.display.blit(self.assets["background"], (0, 0))
 
+            # scroll
             self.scroll[0] += (
                 self.player.rect().centerx
                 - self.display.get_width() / 2
@@ -113,6 +116,10 @@ class Game:
             ) / 20
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
+            # screenshake
+            self.screenshake = max(0, self.screenshake - 1)
+
+            # leafs
             for leaf_rect in self.leaf_spawners:
                 if random.random() * 49999 < leaf_rect.width * leaf_rect.height:
                     pos = (
@@ -131,27 +138,33 @@ class Game:
                         )
                     )
 
+            # clouds
             self.clouds.update()
             self.clouds.render(self.display, render_scroll)
 
+            # tilemap
             self.tilemap.render(self.display, render_scroll)
 
+            # player
             if not self.dead_for:
                 self.player.update(
                     self.tilemap, (self.movement[1] - self.movement[0], 0)
                 )
                 self.player.render(self.display, render_scroll)
 
+            # player dash
             if self.do_dash:
                 self.do_dash = False
                 self.player.dash()
 
+            # enemies
             for enemy in self.enemies.copy():
                 kill = enemy.update(self.tilemap, (0, 0))
                 enemy.render(self.display, render_scroll)
                 if kill:
                     self.enemies.remove(enemy)
 
+            # projectiles
             # projectiles are very simple so we dont need a class
             # [[x, y], direction, timer]
             for projectile in self.projectiles.copy():
@@ -182,9 +195,11 @@ class Game:
                 # the projectile is is far away
                 if projectile[2] > 400:
                     self.projectiles.remove(projectile)
-                # player is not dashing AND is hit
-                elif abs(self.player.dashing) < 50 and self.player.rect().collidepoint(
-                    projectile[0]
+                # player is not dashing AND is alive AND is hit
+                elif (
+                    abs(self.player.dashing) < 50
+                    and not self.dead_for
+                    and self.player.rect().collidepoint(projectile[0])
                 ):
                     # effects for death
                     for i in range(30):
@@ -212,14 +227,17 @@ class Game:
                             )
                         )
                     self.projectiles.remove(projectile)
-                    self.dead_for = 1
+                    self.dead_for += 1
+                    self.screenshake = max(20, self.screenshake)
 
+            # sparks
             for spark in self.sparks.copy():
                 kill = spark.update()
                 spark.render(self.display, render_scroll)
                 if kill:
                     self.sparks.remove(spark)
 
+            # particles
             for particle in self.particles.copy():
                 kill = particle.update()
                 particle.render(self.display, render_scroll)
@@ -228,6 +246,7 @@ class Game:
                 if kill:
                     self.particles.remove(particle)
 
+            # events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.exit()
@@ -254,16 +273,24 @@ class Game:
                     if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         self.movement[1] = False
 
+            # screen
+            screenshake_offset = (
+                random.random() * self.screenshake - self.screenshake / 2,
+                random.random() * self.screenshake - self.screenshake / 2,
+            )
             self.screen.blit(
-                pygame.transform.scale(self.display, self.screen.get_size()), (0, 0)
+                pygame.transform.scale(self.display, self.screen.get_size()),
+                screenshake_offset,
             )
             pygame.display.update()
 
+            # time
             end_time = time.time()
             elapsed_time = end_time - start_time
             self.total_elapsed_time[0] += elapsed_time
             self.total_elapsed_time[1] += 1
 
+            # frame rate
             self.clock.tick(60)
 
     def exit(self):
