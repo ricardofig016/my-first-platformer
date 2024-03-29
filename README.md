@@ -8,7 +8,7 @@ Followed [DaFluffyPotato](https://www.youtube.com/@DaFluffyPotato)'s [tutorial](
 
 ```shell
 python3 -m PyInstaller main.py --noconsole --onefile
-cp data/ dist/
+cp -r data/ dist/
 ```
 
 ## Execution
