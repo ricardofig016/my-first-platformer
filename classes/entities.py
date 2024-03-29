@@ -180,6 +180,7 @@ class Player(PhysicsEntity):
 
     def jump(self):
         if self.wall_slide:
+            self.game.sfx["jump"].play()
             if self.flip and self.last_movement[0] < 0:
                 self.available_jumps -= 1
                 self.velocity = [3.5, -2.5]
@@ -195,12 +196,14 @@ class Player(PhysicsEntity):
             self.available_jumps -= 1
             self.velocity[1] = -3.1
             self.air_time = 5
+            self.game.sfx["jump"].play()
             return True
 
         return False
 
     def dash(self):
         if not self.dashing:
+            self.game.sfx["dash"].play()
             if self.flip:
                 self.dashing = -60
             else:
@@ -240,6 +243,7 @@ class Enemy(PhysicsEntity):
                         self.game.projectiles.append(
                             [[self.rect().centerx - 7, self.rect().centery], -2, 0]
                         )
+                        self.game.sfx["shoot"].play()
                         for i in range(4):
                             self.game.sparks.append(
                                 Spark(
@@ -253,6 +257,7 @@ class Enemy(PhysicsEntity):
                         self.game.projectiles.append(
                             [[self.rect().centerx + 7, self.rect().centery], 2, 0]
                         )
+                        self.game.sfx["shoot"].play()
                         for i in range(4):
                             self.game.sparks.append(
                                 Spark(

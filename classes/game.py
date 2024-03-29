@@ -24,7 +24,8 @@ class Game:
 
         pygame.display.set_caption("my first platformer")
         self.screen = pygame.display.set_mode((320 * 3, 240 * 3))
-        self.display = pygame.Surface((320, 240))
+        self.display = pygame.Surface((320, 240), pygame.SRCALPHA)
+        self.secondary_display = pygame.Surface((320, 240))
 
         self.clock = pygame.time.Clock()
 
@@ -49,6 +50,20 @@ class Game:
             "particle/leaf": Animation(load_images("particles/leaf"), 20, False),
             "particle/particle": Animation(load_images("particles/particle"), 6, False),
         }
+
+        self.sfx = {
+            "ambience": pygame.mixer.Sound("data/sfx/ambience.wav"),
+            "dash": pygame.mixer.Sound("data/sfx/dash.wav"),
+            "hit": pygame.mixer.Sound("data/sfx/hit.wav"),
+            "jump": pygame.mixer.Sound("data/sfx/jump.wav"),
+            "shoot": pygame.mixer.Sound("data/sfx/shoot.wav"),
+        }
+
+        self.sfx["ambience"].set_volume(0.2)
+        self.sfx["dash"].set_volume(0.3)
+        self.sfx["hit"].set_volume(0.8)
+        self.sfx["jump"].set_volume(0.7)
+        self.sfx["shoot"].set_volume(0.4)
 
         self.clouds = Clouds(self.assets["clouds"], 16)
 
@@ -87,21 +102,43 @@ class Game:
 
         self.do_dash = False
         self.dead_for = 0
+        self.transition = -30
 
     def run(self):
+        # music
+        pygame.mixer.music.load("data/music.wav")
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+
+        # ambience sfx
+        self.sfx["ambience"].play(-1)
+
         while True:
             # calculate elapsed time per frame
             start_time = time.time()
+
+            # level passed
+            if not len(self.enemies):
+                self.transition += 1
+                if self.transition >= 30:
+                    if type(self.map_name) == int:
+                        self.map_name += 1
+                    self.load_level()
+            if self.transition < 0:
+                self.transition += 1
 
             # player is dead
             if self.dead_for:
                 # player died 40 frames ago
                 self.dead_for += 1
+                if self.dead_for >= 10:
+                    self.transition = min(30, self.transition + 1)
                 if self.dead_for > 40:
                     self.load_level()
 
             # background
-            self.display.blit(self.assets["background"], (0, 0))
+            self.display.fill((0, 0, 0, 0))
+            self.secondary_display.blit(self.assets["background"], (0, 0))
 
             # scroll
             self.scroll[0] += (
@@ -119,7 +156,7 @@ class Game:
             # screenshake
             self.screenshake = max(0, self.screenshake - 1)
 
-            # leafs
+            # leaves
             for leaf_rect in self.leaf_spawners:
                 if random.random() * 49999 < leaf_rect.width * leaf_rect.height:
                     pos = (
@@ -140,7 +177,7 @@ class Game:
 
             # clouds
             self.clouds.update()
-            self.clouds.render(self.display, render_scroll)
+            self.clouds.render(self.secondary_display, render_scroll)
 
             # tilemap
             self.tilemap.render(self.display, render_scroll)
@@ -182,6 +219,7 @@ class Game:
                 # the projectile hits a wall
                 if self.tilemap.is_solid(projectile[0]):
                     self.projectiles.remove(projectile)
+                    self.sfx["hit"].play()
                     for i in range(4):
                         self.sparks.append(
                             Spark(
@@ -201,6 +239,7 @@ class Game:
                     and not self.dead_for
                     and self.player.rect().collidepoint(projectile[0])
                 ):
+                    self.sfx["hit"].play()
                     # effects for death
                     for i in range(30):
                         angle = random.random() * math.pi * 2
@@ -236,6 +275,14 @@ class Game:
                 spark.render(self.display, render_scroll)
                 if kill:
                     self.sparks.remove(spark)
+
+            # outlines
+            display_mask = pygame.mask.from_surface(self.display)
+            display_silhouette = display_mask.to_surface(
+                setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0)
+            )
+            for offset in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                self.secondary_display.blit(display_silhouette, offset)
 
             # particles
             for particle in self.particles.copy():
@@ -273,13 +320,29 @@ class Game:
                     if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         self.movement[1] = False
 
+            # level transition
+            if self.transition:
+                transition_suface = pygame.Surface(self.display.get_size())
+                pygame.draw.circle(
+                    transition_suface,
+                    (255, 255, 255),
+                    (self.display.get_width() // 2, self.display.get_height() // 2),
+                    (30 - abs(self.transition)) * 8,
+                )
+                # make circle transparent
+                transition_suface.set_colorkey((255, 255, 255))
+                self.display.blit(transition_suface, (0, 0))
+
+            # join displays
+            self.secondary_display.blit(self.display, (0, 0))
+
             # screen
             screenshake_offset = (
                 random.random() * self.screenshake - self.screenshake / 2,
                 random.random() * self.screenshake - self.screenshake / 2,
             )
             self.screen.blit(
-                pygame.transform.scale(self.display, self.screen.get_size()),
+                pygame.transform.scale(self.secondary_display, self.screen.get_size()),
                 screenshake_offset,
             )
             pygame.display.update()
